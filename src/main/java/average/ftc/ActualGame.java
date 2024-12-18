@@ -13,6 +13,8 @@ import java.util.Objects;
 public class ActualGame {
     private static final System.Logger LOGGER = System.getLogger(ActualGame.class.getName());
 
+    private static boolean enemyISR = true;
+
     private static String readFile(InputStream inputStream) throws IOException {
         String result = new String(inputStream.readAllBytes());
         LOGGER.log(System.Logger.Level.DEBUG, "Exiting readFile(InputStream) with result: {0}", result);

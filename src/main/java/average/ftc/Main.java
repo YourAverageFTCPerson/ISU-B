@@ -3,6 +3,7 @@ package average.ftc; // Just my GitHub username
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,14 +34,6 @@ public class Main extends Application {
      * Invokes static initializer.
      */
     public static void doNothing() {
-        PrintStream original = System.out;
-        System.setOut(new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-            }
-        }));
-        System.out.close();
-        System.setOut(original);
     }
 
     public static void main(String[] args) {
@@ -71,6 +64,11 @@ public class Main extends Application {
         Label label = (Label) root.getChildrenUnmodifiable().getFirst();
         Font originalFont = label.getFont();
         primaryStage.show();
+
+        for (Node node : root.getChildrenUnmodifiable()) {
+            if (node instanceof Button button)
+                HoverButtons.applyAnimationTo(button);
+        }
 
         primaryStage.setTitle("Amazing Logo");
 

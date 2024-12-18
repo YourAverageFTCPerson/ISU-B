@@ -25,103 +25,6 @@ public class MapSolver {
         }
     }
 
-    public record Wanderer(Point current, Direction previous, HashMap<Point, Direction[]> whitespaceNodes) {
-        private static final SecureRandom RANDOM;
-
-        static {
-            SecureRandom random;
-            try {
-                random = SecureRandom.getInstanceStrong();
-            } catch (NoSuchAlgorithmException e) {
-                random = new SecureRandom();
-            }
-            RANDOM = random;
-        }
-
-        private Direction pickRandomWithoutPrevious() {
-            Direction[] available = Arrays.stream(this.whitespaceNodes.get(this.current))
-                                                  .filter(t -> t != this.previous)
-                                                  .toArray(Direction[]::new);
-
-            return available[RANDOM.nextInt(0, available.length)];
-        }
-
-        public Wanderer next() {
-            Direction pick = this.pickRandomWithoutPrevious();
-            Point next = getImmediate(this.current, pick);
-            return new Wanderer(next, pick, this.whitespaceNodes);
-        }
-    }
-
-//    public static class ProbabilisticRoute implements Cloneable {
-//        private static final SecureRandom RANDOM;
-//
-//        static {
-//            SecureRandom random;
-//            try {
-//                random = SecureRandom.getInstanceStrong();
-//            } catch (NoSuchAlgorithmException e) {
-//                random = new SecureRandom();
-//            }
-//            RANDOM = random;
-//        }
-//
-//        private Point currentPoint;
-//
-//        private Direction[] currentDirections;
-//
-//        private Direction currentlyChosen;
-//
-//        private HashMap<Point, Direction[]> whitespaceNodes;
-//
-//        private ProbabilisticRoute(HashMap<Point, Direction[]> whitespaceNodes, Point[] first) {
-//            this.whitespaceNodes = Objects.requireNonNull(whitespaceNodes);
-//            this.currentPoint = Objects.requireNonNull(first);
-//            this.currentDirections = whitespaceNodes.get(first);
-//            this.currentlyChosen = this.currentDirections[RANDOM.nextInt(0, this.currentDirections.length)];
-//        }
-//
-//        private Direction pickRandomWithoutPrevious() {
-//            Direction[] currentDirections = Arrays.stream(this.currentDirections).filter(t -> t != this.currentlyChosen).toArray(Direction[]::new);;
-//
-//            return this.currentlyChosen = currentDirections[RANDOM.nextInt(0, currentDirections.length)];
-//        }
-//
-//        public boolean hasNext(int exitX) {
-//            return this.currentPoint.x() < exitX;
-//        }
-//
-//        public Point next() {
-//            this.currentPoint = getImmediate(this.currentPoint, this.pickRandomWithoutPrevious());
-//            this.currentDirections = this.whitespaceNodes.get(this.currentPoint);
-//            return this.currentPoint;
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return this.getClass().getName() + "[currentPoint=" + this.currentPoint + ",currentDirections=" +
-//                    Arrays.toString(this.currentDirections) + ",whitespaceNodes=" + this.whitespaceNodes +
-//                    ",currentlyChosen=" + this.currentlyChosen;
-//        }
-//
-//        @Override
-//        public ProbabilisticRoute clone() {
-//            try {
-//                ProbabilisticRoute clone = (ProbabilisticRoute) super.clone();
-//                clone.currentPoint = this.currentPoint;
-//                clone.currentDirections = this.currentDirections;
-//                clone.whitespaceNodes = this.whitespaceNodes;
-//                clone.currentlyChosen = this.currentlyChosen;
-//                if (DEBUG)
-//                    System.getLogger(ProbabilisticRoute.class.getName()).log(
-//                            System.Logger.Level.DEBUG, "this: {0}, clone: {1}", this, clone);
-//                return clone;
-//            } catch (CloneNotSupportedException e) {
-//                throw new AssertionError();
-//            }
-//        }
-//    }
-
     private static String deepToString(HashMap<Point, Direction[]> map) {
         Iterator<Map.Entry<Point, Direction[]>> i = map.entrySet().iterator();
         if (!i.hasNext())
@@ -144,8 +47,8 @@ public class MapSolver {
 
     public static Point getImmediate(Point current, Direction direction) {
         return switch (Objects.requireNonNull(direction)) {
-            case UP -> new Point(Objects.requireNonNull(current).x(), current.y() + 1);
-            case DOWN -> new Point(current.x(), current.y() - 1);
+            case UP -> new Point(Objects.requireNonNull(current).x(), current.y() - 1);
+            case DOWN -> new Point(current.x(), current.y() + 1);
             case LEFT -> new Point(current.x() - 1, current.y());
             case RIGHT -> new Point(current.x() + 1, current.y());
         };
@@ -163,11 +66,11 @@ public class MapSolver {
 //        char[][] matrix = Arrays.stream(lines).map(String::toCharArray).toArray(char[][]::new);
         int firstLineLength = lines[0].length();
         char[][] matrix = new char[numberOfLines][firstLineLength];
-        for (int i = 0; i < numberOfLines; i++) { // Regular for loop to save time instead of looping like 5 times with streams.
-            String line = lines[i];
+        for (int j = 0; j < numberOfLines; j++) { // Regular for loop to save time instead of looping like 5 times with streams.
+            String line = lines[j];
             if (line.length() != firstLineLength)
                 throw new IllegalArgumentException("All rows of the map must have the same length.");
-            matrix[i] = line.toCharArray();
+            matrix[j] = line.toCharArray();
         }
 
         HashSet<Point> whitespaces = new HashSet<>(Math.round(firstLineLength * numberOfLines * 0.75f));
@@ -193,9 +96,9 @@ public class MapSolver {
 //            whitespaces.add(new Point(i, firstLineLengthMinusOne));
 //        }
 
-        for (int i = 0; i < numberOfLines; i++)
-            for (int j = 0; j < firstLineLength; j++)
-                if (Character.isWhitespace(matrix[i][j]))
+        for (int i = 0; i < firstLineLength; i++)
+            for (int j = 0; j < numberOfLines; j++)
+                if (Character.isWhitespace(matrix[j][i]))
                     whitespaces.add(new Point(i, j));
 
         HashMap<Point, Direction[]> whitespaceNodes = new HashMap<>();
@@ -204,13 +107,13 @@ public class MapSolver {
             int x = e.x(), y = e.y();
             ArrayList<Direction> directions = new ArrayList<>(4);
             if (x > 0 && whitespaces.contains(new Point(x - 1, y)))
-                directions.add(Direction.UP);
-            if (x < numberOfLines - 1 && whitespaces.contains(new Point(x + 1, y)))
-                directions.add(Direction.DOWN);
-            if (y > 0 && whitespaces.contains(new Point(x, y - 1)))
                 directions.add(Direction.LEFT);
-            if (y < firstLineLength - 1 && whitespaces.contains(new Point(x, y + 1)))
+            if (x < firstLineLength && whitespaces.contains(new Point(x + 1, y)))
                 directions.add(Direction.RIGHT);
+            if (y > 0 && whitespaces.contains(new Point(x, y - 1)))
+                directions.add(Direction.UP);
+            if (y < numberOfLines && whitespaces.contains(new Point(x, y + 1)))
+                directions.add(Direction.DOWN);
             whitespaceNodes.put(e, directions.toArray(new Direction[0]));
         });
 

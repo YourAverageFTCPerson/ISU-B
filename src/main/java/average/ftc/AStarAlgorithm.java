@@ -1,9 +1,12 @@
 package average.ftc;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
 
 /**
  * Only used if enemy ISR is allowed to fly over for 20 seconds.
@@ -25,13 +28,24 @@ public final class AStarAlgorithm {
 
     private static Iterable<MapSolver.Point> getNeighbours(MapSolver.Point point, HashMap<MapSolver.Point, MapSolver.Direction[]> neighbours) {
         MapSolver.Direction[] directions = neighbours.get(point);
-        System.out.println(point);
+        if (directions == null)
+            return () -> new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public MapSolver.Point next() {
+                    return null;
+                }
+            };
         return () -> new Iterator<>() {
             private int index;
 
             @Override
             public boolean hasNext() {
-                return this.index == directions.length - 1;
+                return this.index < directions.length;
             }
 
             @Override
@@ -67,7 +81,7 @@ public final class AStarAlgorithm {
         HashMap<MapSolver.Point, Double> fScore = new HashMap<>(); // default value is infinity
 
         while (!openSet.isEmpty()) {
-            MapSolver.Point current = openSet.stream().reduce(BinaryOperator.maxBy(MapSolver.Point::compareTo)).get();
+            MapSolver.Point current = openSet.stream().reduce((node1, node2) -> (fScore.getOrDefault(node1, Double.POSITIVE_INFINITY) <= fScore.getOrDefault(node2, Double.POSITIVE_INFINITY)) ? node1 : node2).get();
             if (current.equals(goal))
                 return reconstructPath(cameFrom, current);
             openSet.remove(current);
@@ -82,6 +96,8 @@ public final class AStarAlgorithm {
                 }
             }
         }
+
+//        System.out.println("openSet=" + openSet + ",gScore=" + gScore + ",cameFrom=" + cameFrom + ",fScore=" + fScore);
 
         throw new IllegalArgumentException();
     }

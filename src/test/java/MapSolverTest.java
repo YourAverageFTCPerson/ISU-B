@@ -3,6 +3,10 @@ import average.ftc.MapSolver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class MapSolverTest {
     @BeforeAll
     public static void initialize() {
@@ -11,10 +15,10 @@ public class MapSolverTest {
 
     @Test
     public void testGetValidPaths() {
-        MapSolver.getFastestPath("""
-                ################## #########\s
-                ################## ##########
-                #############################
-              \s""");
+        assertEquals(List.of(new MapSolver.Point("#################".length(), 0), new MapSolver.Point("##################".length(), 0), new MapSolver.Point("##################".length(), 1)), List.of(MapSolver.getFastestPath("""
+                ###############     ########\s
+                ############### #  ##########
+                ###############    ##########
+                """, new MapSolver.Point("#################".length(), 0), new MapSolver.Point("##################".length(), 1))));
     }
 }
