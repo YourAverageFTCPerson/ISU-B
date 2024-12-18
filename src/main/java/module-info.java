@@ -3,5 +3,6 @@ module average.ftc {
     requires javafx.fxml;
     requires java.desktop;
     requires javafx.media;
+    requires jdk.jshell;
     requires java.logging;
 }

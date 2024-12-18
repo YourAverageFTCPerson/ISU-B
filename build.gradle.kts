@@ -9,7 +9,6 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-//    maven("https://maven.openjfx.io")
 }
 
 dependencies {
@@ -17,11 +16,17 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("org.openjfx:javafx-controls:23.0.1") // Update to the latest version if needed
     implementation("org.openjfx:javafx-fxml:23.0.1")    // Update to the latest version if needed
-    implementation("org.openjfx:javafx-media:23.0.1");
+    implementation("org.openjfx:javafx-media:23.0.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // https://stackoverflow.com/questions/77579350/how-do-i-get-rid-of-automatic-loading-of-test-framework-implementation-dependen
 }
 
 application {
     mainClass.set("average.ftc.Main") // Adjust to your main class
+//    mainClass.set("average.ftc.AStarAlgoTest") // Adjust to your main class
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }
 
 tasks.test {
@@ -31,12 +36,6 @@ tasks.test {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(23))
-    }
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(23)) // Set to Java 23
     }
 }
 

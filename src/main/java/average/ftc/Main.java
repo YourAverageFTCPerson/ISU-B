@@ -11,51 +11,65 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Objects;
 import java.util.logging.*;
 
 public class Main extends Application {
+    private static final System.Logger LOGGER = System.getLogger(Main.class.getName());
+
     static {
-        for (Handler handler : Logger.getLogger("").getHandlers()) {
-            handler.setLevel(Level.FINEST);
+        Logger root = Logger.getLogger("");
+        for (Handler handler : root.getHandlers()) {
+            handler.setLevel(Level.ALL);
             handler.setFilter(record -> record.getSourceClassName().startsWith("average.ftc"));
         }
+        root.setLevel(Level.ALL);
+        LOGGER.log(System.Logger.Level.INFO, "Hello World!");
     }
 
-    private static final System.Logger LOGGER = System.getLogger(Main.class.getName());
+    /**
+     * Invokes static initializer.
+     */
+    public static void doNothing() {
+        PrintStream original = System.out;
+        System.setOut(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+            }
+        }));
+        System.out.close();
+        System.setOut(original);
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    public static Runnable loadingAnimation(Label label) {
-        return () -> {
-            try {
-                label.setFont(Font.font(50));
-                for (int i = 0; i < 3; i++) {
-                    Platform.runLater(() -> label.setText(""));
-                    Thread.sleep(500L);
-                    Platform.runLater(() -> label.setText("."));
-                    Thread.sleep(500L);
-                    Platform.runLater(() -> label.setText(".."));
-                    Thread.sleep(500L);
-                    Platform.runLater(() -> label.setText("..."));
-                    Thread.sleep(500L);
-                }
-            } catch (InterruptedException _) {
-            }
-        };
+    public static void loadingAnimation(Label label) throws InterruptedException {
+        label.setFont(Font.font(50));
+        for (int i = 0; i < 3; i++) {
+            Platform.runLater(() -> label.setText(""));
+            Thread.sleep(500L);
+            Platform.runLater(() -> label.setText("."));
+            Thread.sleep(500L);
+            Platform.runLater(() -> label.setText(".."));
+            Thread.sleep(500L);
+            Platform.runLater(() -> label.setText("..."));
+            Thread.sleep(500L);
+        }
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         AnchorPane root = FXMLLoader.load(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("SplashScreen.fxml")));
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("application.css")).toExternalForm());
+//        scene.getStylesheets().add(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("application.css")).toExternalForm());
         primaryStage.setScene(scene);
         LOGGER.log(System.Logger.Level.DEBUG, root.getChildrenUnmodifiable());
         Label label = (Label) root.getChildrenUnmodifiable().getFirst();
+        Font originalFont = label.getFont();
         primaryStage.show();
 
         primaryStage.setTitle("Amazing Logo");
@@ -71,24 +85,27 @@ public class Main extends Application {
                 Thread.sleep(1000L);
                 Platform.runLater(() -> label.setText(label.getText() + " The objective is to kill enemies. Like this one."));
                 Thread.sleep(1000L);
-                DeathSound.play();
+                Sounds.playDeathSound();
                 Platform.runLater(() -> root.getChildrenUnmodifiable().get(1).setVisible(false));
                 Thread.sleep(500L);
+                loadingAnimation(label);
+                Platform.runLater(() -> {
+                    if (label.getText().equals("Press it again.")) return;
+                    label.setPrefWidth(500d);
+                    label.setText("PLEASE STAND BY");
+                });
             } catch (InterruptedException _) {
-                Platform.runLater(() -> label.setText("Press it again."));
-                return;
             }
-            loadingAnimation(label).run();
-            Platform.runLater(() -> {
-                label.setPrefWidth(500);
-                label.setText("PLEASE STAND BY");
-            });
         });
 
         Button start = (Button) root.getChildrenUnmodifiable().get(2);
         start.setOnMouseClicked(e -> {
             LOGGER.log(System.Logger.Level.DEBUG, e);
             funny.interrupt();
+            Platform.runLater(() -> {
+                label.setFont(originalFont);
+                label.setText("Press it again.");
+            });
             start.setOnMouseClicked(_ -> ActualGame.startOn(primaryStage));
         });
     }

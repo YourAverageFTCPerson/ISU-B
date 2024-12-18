@@ -6,7 +6,11 @@ import javafx.scene.media.MediaPlayer;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-public final class DeathSound {
+public class Sounds {
+    protected Sounds() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final class DeathSoundHolder {
         private static final MediaPlayer DEATH_SOUND;
 
@@ -19,7 +23,7 @@ public final class DeathSound {
         }
     }
 
-    public static void play() {
+    public static void playDeathSound() {
         DeathSoundHolder.DEATH_SOUND.play();
     }
 }
