@@ -6,12 +6,12 @@ import javafx.animation.TranslateTransition;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
 
-public class HoverButtons {
-    protected HoverButtons () {
+public class ButtonEffects {
+    protected ButtonEffects() {
         throw new UnsupportedOperationException();
     }
 
-    public static void applyAnimationTo(Button button) {
+    public static void applyAnimationsTo(Button button) {
         TranslateTransition transition = new TranslateTransition();
         transition.setNode(button);
         transition.setDuration(Duration.millis(1000d));
@@ -21,18 +21,14 @@ public class HoverButtons {
 
         button.hoverProperty().addListener((_, _, current) -> {
             scale.stop();
-            if (current) {
-                scale.setToX(1.5);
-                scale.setToY(1.5);
-            } else {
-                scale.setToX(1.0);
-                scale.setToY(1.0);
-            }
+            double amount = current ? 1.5 : 1d;
+            scale.setToX(amount);
+            scale.setToY(amount);
             scale.play();
         });
         transition.setCycleCount(TranslateTransition.INDEFINITE);
         transition.setInterpolator(Interpolator.EASE_BOTH);
-        transition.setByY(20);
+        transition.setByY(20d);
         transition.setAutoReverse(true);
         transition.play();
     }

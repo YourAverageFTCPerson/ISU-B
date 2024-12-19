@@ -12,10 +12,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Objects;
-import java.util.logging.*;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends Application {
     private static final System.Logger LOGGER = System.getLogger(Main.class.getName());
@@ -56,23 +56,23 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        AnchorPane root = FXMLLoader.load(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("SplashScreen.fxml")));
+        AnchorPane root = FXMLLoader.load(Objects.requireNonNull(
+                Thread.currentThread().getContextClassLoader().getResource("SplashScreen.fxml")));
         Scene scene = new Scene(root);
-//        scene.getStylesheets().add(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("application.css")).toExternalForm());
         primaryStage.setScene(scene);
         LOGGER.log(System.Logger.Level.DEBUG, root.getChildrenUnmodifiable());
         Label label = (Label) root.getChildrenUnmodifiable().getFirst();
         Font originalFont = label.getFont();
         primaryStage.show();
 
-        for (Node node : root.getChildrenUnmodifiable()) {
+        for (Node node : root.getChildrenUnmodifiable())
             if (node instanceof Button button)
-                HoverButtons.applyAnimationTo(button);
-        }
+                ButtonEffects.applyAnimationsTo(button);
 
         primaryStage.setTitle("Amazing Logo");
 
-        primaryStage.getIcons().add(new Image(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("icon.png")).toExternalForm()));
+        primaryStage.getIcons().add(new Image(Objects.requireNonNull(
+                Thread.currentThread().getContextClassLoader().getResource("icon.png")).toExternalForm()));
 
 //        Enemy enemy = new Enemy((ImageView) root.getChildrenUnmodifiable().get(1));
 
@@ -81,10 +81,14 @@ public class Main extends Application {
                 Thread.sleep(1000L);
                 Platform.runLater(() -> label.setText(label.getText() + " This is JavaFX."));
                 Thread.sleep(1000L);
-                Platform.runLater(() -> label.setText(label.getText() + " The objective is to kill enemies. Like this one."));
+                Platform.runLater(
+                        () -> label.setText(label.getText() + " The objective is to kill enemies. Like this one."));
                 Thread.sleep(1000L);
-                Sounds.playDeathSound();
-                Platform.runLater(() -> root.getChildrenUnmodifiable().get(1).setVisible(false));
+
+                Sounds.playSound(Sounds.FriendlyGunHolder.FRIENDLY_GUN);
+                Platform.runLater(() -> root.getChildrenUnmodifiable().get(1).setVisible(false)); // Hide now dead enemy
+                Sounds.playSound(Sounds.DeathHolder.DEATH);
+
                 Thread.sleep(500L);
                 loadingAnimation(label);
                 Platform.runLater(() -> {
