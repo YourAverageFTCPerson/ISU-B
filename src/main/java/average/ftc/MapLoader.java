@@ -1,5 +1,6 @@
 package average.ftc;
 
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -16,7 +17,7 @@ public class MapLoader {
         throw new UnsupportedOperationException();
     }
 
-    public static final char WALL = '|', OBSERVATION_POST = '#';
+    public static final char WALL = '|', OBSERVATION_POST = '#', GOAL = 'G';
 
     private static final double X_SCALE = 100d;
 
@@ -28,8 +29,22 @@ public class MapLoader {
         private static final Image OBSERVATION_POST = new Image(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("ObservationPost.png")), X_SCALE, 0d, true, true);
     }
 
+    private static final class GoalHolder {
+        private static final Image GOAL = new Image(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("jackpot-logo.png")), X_SCALE, 0d, true, true);
+    }
+
+    public static double mapWidth;
+
+    private static final class EmptyListHolder {
+        private static final LinkedList<Node> EMPTY_LIST = new LinkedList<>();
+    }
+
     private static LinkedList<Node> loadImplementation(String map) {
         LOGGER.log(System.Logger.Level.TRACE, "entering loadImplementation(String) with param: {0}", map);
+
+        if (map.isBlank())
+            return EmptyListHolder.EMPTY_LIST;
+
         LinkedList<Node> children = new LinkedList<>();
 
         String[] lines = map.lines().toArray(String[]::new);
@@ -37,15 +52,25 @@ public class MapLoader {
         ImageView view;
         char c;
         final double Y_SCALE = ObservationPostHolder.OBSERVATION_POST.getHeight();
+
+        int firstLineLength = lines[0].length();
+
         for (int j = 0; j < lines.length; j++) {
             LOGGER.log(System.Logger.Level.DEBUG, "j = {0}", j);
             line = lines[j];
-            for (int i = 0; i < line.length(); i++) {
+            int lineLength = line.length();
+            if (lineLength != firstLineLength) {
+//                throw new IllegalArgumentException("All lines must be the same length");
+                LOGGER.log(System.Logger.Level.ERROR, "ALL LINES MUST BE THE SAME LENGTH");
+                System.exit(1);
+            }
+            for (int i = 0; i < lineLength; i++) {
                 LOGGER.log(System.Logger.Level.DEBUG, "i = {0}", i);
                 if (Character.isWhitespace(c = line.charAt(i))) continue;
                 view = new ImageView(switch (c) {
                     case WALL -> WallHolder.WALL;
                     case OBSERVATION_POST -> ObservationPostHolder.OBSERVATION_POST;
+                    case GOAL -> GoalHolder.GOAL;
                     default -> throw new IllegalArgumentException("Invalid map");
                 });
                 LOGGER.log(System.Logger.Level.DEBUG, view);

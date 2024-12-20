@@ -17,6 +17,8 @@ dependencies {
     implementation("org.openjfx:javafx-controls:23.0.1") // Update to the latest version if needed
     implementation("org.openjfx:javafx-fxml:23.0.1")    // Update to the latest version if needed
     implementation("org.openjfx:javafx-media:23.0.1")
+//    implementation("com.fasterxml.jackson.core:jackson-core:2.18.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") // https://stackoverflow.com/questions/77579350/how-do-i-get-rid-of-automatic-loading-of-test-framework-implementation-dependen
 }
 

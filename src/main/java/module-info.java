@@ -5,4 +5,5 @@ module average.ftc {
     requires javafx.media;
     requires jdk.jshell;
     requires java.logging;
+    requires com.fasterxml.jackson.databind;
 }

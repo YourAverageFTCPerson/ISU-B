@@ -1,11 +1,9 @@
 package average.ftc;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
 
 public class MapSolver {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * Allow subclasses but not instances.
