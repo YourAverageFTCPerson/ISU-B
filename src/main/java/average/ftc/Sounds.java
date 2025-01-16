@@ -60,7 +60,7 @@ public class Sounds {
 
         static {
             try {
-                Path path = Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("bgm0.txt")).toURI());
+                Path path = Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("bgm0.for_lfs")).toURI());
                 byte[] cipherText = Files.readAllBytes(path);
                 File temp = File.createTempFile("tmp", ".wav");
                 temp.deleteOnExit();
@@ -85,7 +85,7 @@ public class Sounds {
 
         static {
             try {
-                Path path = Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("loss0.txt")).toURI());
+                Path path = Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("loss0.for_lfs")).toURI());
                 byte[] cipherText = Files.readAllBytes(path);
                 File temp = File.createTempFile("tmp", ".wav");
                 temp.deleteOnExit();
