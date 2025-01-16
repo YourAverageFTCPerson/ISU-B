@@ -3,7 +3,7 @@ package average.ftc;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -44,6 +44,18 @@ public class Sounds {
     }
 
     public static final class EncryptedHolder {
+        private static final SecretKey SECRET_KEY;
+
+        static {
+            try {
+                SECRET_KEY = AESUtils.getKeyFromPassword(Main.password, "huygyy6*Y*(7yGBbbb");
+            } catch (Exception e) {
+                LOGGER.log(System.Logger.Level.ERROR, "Failed to accept key.", e);
+                System.exit(1);
+                throw new AssertionError(e);
+            }
+        }
+
         public static final MediaPlayer BGM0;
 
         static {
@@ -53,7 +65,7 @@ public class Sounds {
                 File temp = File.createTempFile("tmp", ".wav");
                 temp.deleteOnExit();
                 Files.write(Path.of(temp.getPath()),
-                        AESUtils.decrypt(new AESUtils.Encrypted(Base64.getDecoder().decode(cipherText), Base64.getDecoder().decode(Files.readAllBytes(Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("bgm0iv.txt")).toURI())))), new SecretKeySpec(Main.password, "AES")));
+                        AESUtils.decrypt(new AESUtils.Encrypted(Base64.getDecoder().decode(cipherText), Base64.getDecoder().decode(Files.readAllBytes(Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("bgm0iv.txt")).toURI())))), SECRET_KEY));
                 BGM0 = new MediaPlayer(new Media(temp.toURI().toString()));
 //                BGM1.play();
 //                System.out.println(BGM1.getStatus());
@@ -78,7 +90,7 @@ public class Sounds {
                 File temp = File.createTempFile("tmp", ".wav");
                 temp.deleteOnExit();
                 Files.write(Path.of(temp.getPath()),
-                        AESUtils.decrypt(new AESUtils.Encrypted(Base64.getDecoder().decode(cipherText), Base64.getDecoder().decode(Files.readAllBytes(Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("loss0iv.txt")).toURI())))), new SecretKeySpec(Main.password, "AES")));
+                        AESUtils.decrypt(new AESUtils.Encrypted(Base64.getDecoder().decode(cipherText), Base64.getDecoder().decode(Files.readAllBytes(Path.of(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("loss0iv.txt")).toURI())))), SECRET_KEY));
                 LOSS0 = new MediaPlayer(new Media(temp.toURI().toString()));
             } catch (NullPointerException e) {
                 LOGGER.log(System.Logger.Level.ERROR, "Loss 0 doesn't exist.");
@@ -89,7 +101,7 @@ public class Sounds {
         }
 
         static {
-            Arrays.fill(Main.password, (byte) 0);
+            Arrays.fill(Main.password, '\0');
         }
     }
 }

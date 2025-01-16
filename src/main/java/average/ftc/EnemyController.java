@@ -11,6 +11,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EnemyController implements Initializable {
     private static final System.Logger LOGGER = System.getLogger(EnemyController.class.getName());
@@ -47,27 +48,31 @@ public class EnemyController implements Initializable {
         transition.play();
     }
 
-    private static void playAll(Iterator<TranslateTransition> transitions, SecureRandom random) {
-        if (Thread.currentThread().isInterrupted()) return;
+    private static void playAll(AtomicBoolean stopped, Iterator<TranslateTransition> transitions, SecureRandom random) {
+        if (stopped.get()) return;
         if (!transitions.hasNext()) {
+            if (stopped.get()) return;
             Sounds.EncryptedHolder.BGM0.stop();
             // TODO
+            Sounds.FriendlyGunHolder.FRIENDLY_GUN.stop();
             Sounds.EncryptedHolder.LOSS0.play();
             return;
         }
         TranslateTransition transition = transitions.next();
         while (random.nextDouble() >= 0.5) { // chance
-            if (Thread.currentThread().isInterrupted()) return;
+            if (stopped.get()) return;
         }
 //        System.out.println("playing " + transition);
         transition.play();
-        transition.setOnFinished(_ -> playAll(transitions, random));
+        if (stopped.get()) return;
+
+        transition.setOnFinished(_ -> playAll(stopped, transitions, random));
     }
 
-    public record ThreadStuff(Thread thread, SecureRandom random) {
+    public record MoverStuff(AtomicBoolean stopped, SecureRandom random) {
     }
 
-    static HashMap<ImageView, ThreadStuff> movementThreads = new HashMap<>();
+    static HashMap<ImageView, MoverStuff> movements = new HashMap<>();
 
     public static ImageView[] spawnNormalEnemies(int amount) {
         if (base == null)
@@ -81,7 +86,7 @@ public class EnemyController implements Initializable {
             enemies[i].setPreserveRatio(true);
             enemies[i].setTranslateX(-MapLoader.getXScale());
             enemies[i].setTranslateY(i * MapLoader.getYScale());
-            System.out.println("ogY:" + enemies[i].getY());
+            System.out.println("y: " + enemies[i].getTranslateY());
             enemies[i].setVisible(true);
             SecureRandom random;
             try {
@@ -90,27 +95,25 @@ public class EnemyController implements Initializable {
                 LOGGER.log(System.Logger.Level.WARNING, "No strong SecureRandom instances–using 'new SecureRandom()'", e);
                 random = new SecureRandom();
             }
-            Thread movement = getThread(random, i, enemies);
 
-            movementThreads.put(enemies[i], new ThreadStuff(movement, random));
+            AtomicBoolean stopped = new AtomicBoolean();
 
-            movement.start();
+            movements.put(enemies[i], new MoverStuff(stopped, random));
+
+            makeThread(stopped, random, i, enemies);
         }
         return enemies;
     }
 
-    private static Thread getThread(SecureRandom random, int finalI, ImageView[] enemies) {
-        Thread movement = new Thread(() -> {
+    private static void makeThread(AtomicBoolean stopped, SecureRandom random, int finalI, ImageView[] enemies) {
+        new Thread(() -> {
             try {
                 Thread.sleep(finalI * 1000L);
             } catch (InterruptedException e) {
-                LOGGER.log(System.Logger.Level.DEBUG, "Thread '{0}' was interrupted.", Thread.currentThread().getName());
                 return;
             }
-            playAll(createTransitions(enemies[finalI]).iterator(), random);
-        });
-        movement.setName("EnemyMover-" + finalI);
-        return movement;
+            playAll(stopped, createTransitions(enemies[finalI]).iterator(), random);
+        }).start();
     }
 
     static MapSolver.Point[] fastestPath;

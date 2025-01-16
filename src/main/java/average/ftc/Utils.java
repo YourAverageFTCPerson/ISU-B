@@ -23,7 +23,7 @@ public class Utils {
     }
 
     public static void shootAt(double fromX, double fromY, ImageView to) {
-        if (true) return;
+//        if (true) return;
         Objects.requireNonNull(to, "to");
         ImageView bullet = new ImageView(BULLET_IN_AIR); // Multiple bullets at the same time are possible
         bullet.setTranslateX(fromX);
@@ -44,7 +44,7 @@ public class Utils {
         transition.setOnFinished(_ -> {
             map.remove(bullet);
             bullet.setVisible(false);
-            EnemyController.movementThreads.get(to).thread().interrupt();
+            EnemyController.movements.get(to).stopped().set(true);
             map.remove(to);
             new MediaPlayer(Sounds.DeathHolder.DEATH.getMedia()).play();
         });

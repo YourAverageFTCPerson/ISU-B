@@ -41,14 +41,13 @@ public class Main extends Application {
                 handler.setLevel(Level.ALL);
                 handler.setFilter(filter);
             }
-            System.out.println("len: " + root.getHandlers().length);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
         LOGGER.log(System.Logger.Level.INFO, "Hello World!");
     }
 
-    static byte[] password;
+    static char[] password;
 
     public static void main(String[] args) throws Exception {
         try {
@@ -57,23 +56,17 @@ public class Main extends Application {
             throw new AssertionError(e);
         }
         Console console = System.console();
-        char[] temp;
         if (console != null)
-            temp = console.readPassword("password: ");
+            password = console.readPassword("password: ");
         else {
             System.out.print("password: ");
             System.out.flush();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-                temp = reader.readLine().toCharArray();
+                password = reader.readLine().toCharArray();
             }
         }
 
-        password = new byte[temp.length];
-
-        for (int i = 0; i < temp.length; i++) {
-            password[i] = (byte) temp[i];
-            temp[i] = '\0';
-        }
+        Class.forName(Sounds.EncryptedHolder.class.getName());
 
         launch(args);
     }
@@ -102,7 +95,6 @@ public class Main extends Application {
         LOGGER.log(System.Logger.Level.DEBUG, root.getChildrenUnmodifiable());
         Label label = (Label) root.getChildrenUnmodifiable().getFirst();
         Font originalFont = label.getFont();
-        primaryStage.show();
 
         for (Node node : root.getChildrenUnmodifiable())
             if (node instanceof Button button)
@@ -151,9 +143,8 @@ public class Main extends Application {
             });
             start.setOnMouseClicked(_ -> {
                 ActualGame.startOn(primaryStage);
-                primaryStage.getIcons().add(new Image(Objects.requireNonNull(
-                        Thread.currentThread().getContextClassLoader().getResource("icon.png")).toExternalForm()));
             });
         });
+        primaryStage.show();
     }
 }

@@ -3,11 +3,16 @@ package average.ftc;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.Optional;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AESUtils {
     private static final System.Logger LOGGER = System.getLogger(AESUtils.class.getName());
@@ -31,6 +36,12 @@ public class AESUtils {
         }
 
         return keyGenerator.generateKey();
+    }
+
+    public static SecretKey getKeyFromPassword(char[] password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(password, salt.getBytes(), 65536, 256);
+        return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 
     private AESUtils() {
@@ -71,10 +82,8 @@ public class AESUtils {
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, sk, new GCMParameterSpec(128, encrypted.iv));
-            System.out.println(cipher);
             return cipher.doFinal(encrypted.cipherText);
         } catch (Exception e) {
-            System.err.println(e);
             LOGGER.log(System.Logger.Level.ERROR, (String) null, e);
             System.exit(1);
             throw new AssertionError();

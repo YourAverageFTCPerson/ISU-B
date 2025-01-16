@@ -185,6 +185,9 @@ public class ActualGame {
                 groundToAir.setVisible(false);
             });
 
+//            map.minHeight(MapLoader.getXScale() * MapLoader.getRows());
+//            map.setLayoutX(0);
+//            map.setLayoutY(0);
             mapUnsynchronized.addAll(EnemyController.spawnNormalEnemies(config.getEnemies()));
             ON_ROOT_LOADED.forEach(Runnable::run);
             Sounds.EncryptedHolder.BGM0.play();
