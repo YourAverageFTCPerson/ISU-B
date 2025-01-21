@@ -1,7 +1,10 @@
 package average.ftc;
 
 import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -9,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -72,6 +76,53 @@ public class ActualGame {
 
     private static void showAlert(Label alert) {
         showAlert(alert, null);
+    }
+
+    private static final class DragContext {
+        public double mouseAnchorX;
+        public double mouseAnchorY;
+        public double initialTranslateX;
+        public double initialTranslateY;
+    }
+
+    private Node makeDraggable(final Node node) {
+        final Group wrapGroup = new Group(node);
+        final DragContext dragContext = new DragContext();
+
+        wrapGroup.addEventFilter(
+                MouseEvent.ANY,
+                Event::consume);
+
+        wrapGroup.addEventFilter(
+                MouseEvent.MOUSE_PRESSED,
+                mouseEvent -> {
+                    // remember initial mouse cursor coordinates
+                    // and node position
+                    dragContext.mouseAnchorX = mouseEvent.getX();
+                    dragContext.mouseAnchorY = mouseEvent.getY();
+                    dragContext.initialTranslateX =
+                            node.getTranslateX();
+                    dragContext.initialTranslateY =
+                            node.getTranslateY();
+                });
+
+        wrapGroup.addEventFilter(
+                MouseEvent.MOUSE_DRAGGED,
+                mouseEvent -> {
+                    // shift node from its initial position by delta
+                    // calculated from mouse cursor movement
+                    node.setTranslateX(
+                            dragContext.initialTranslateX
+                                    + mouseEvent.getX()
+                                    - dragContext.mouseAnchorX);
+                    node.setTranslateY(
+                            dragContext.initialTranslateY
+                                    + mouseEvent.getY()
+                                    - dragContext.mouseAnchorY);
+                });
+
+        return wrapGroup;
+
     }
 
     private static final LinkedList<Runnable> ON_ROOT_LOADED = new LinkedList<>();
@@ -183,6 +234,14 @@ public class ActualGame {
             ISRController.ON_ISR_DONE.add(() -> {
                 groundToAir.setOnMouseClicked(null);
                 groundToAir.setVisible(false);
+                Label label = new Label("You've doomed us all");
+                label.setFont(warner.getFont());
+                label.setTextFill(warner.getTextFill());
+                Platform.runLater(() -> {
+                    root.getChildren().add(label);
+                    showAlert(label, () -> root.getChildren().remove(label));
+                });
+                System.out.println("Shown");
             });
 
 //            map.minHeight(MapLoader.getXScale() * MapLoader.getRows());

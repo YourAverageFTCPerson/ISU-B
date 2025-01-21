@@ -67,7 +67,7 @@ public class MapLoader {
         private static final LinkedList<Node> EMPTY_LIST = new LinkedList<>();
     }
 
-//    static MapSolver.Point start, goal;
+    static MapSolver.Point start, goal;
 
     private static LinkedList<Node> loadImplementation(String map) {
         LOGGER.log(System.Logger.Level.TRACE, "entering loadImplementation(String) with param: {0}", map);
@@ -121,7 +121,7 @@ public class MapLoader {
                     case GOAL:
                         if (++numberOfGoals == 2)
                             throw new IllegalArgumentException("Only one goal is allowed");
-//                        goal = new MapSolver.Point(i, j);
+                        goal = new MapSolver.Point(i, j);
                         view = new ImageView(GoalHolder.GOAL);
                         view.setX(i * getXScale());
                         view.setY(j * getYScale());
@@ -130,6 +130,7 @@ public class MapLoader {
                     case START:
                         if (++numberOfStarts == 2)
                             throw new IllegalArgumentException("Only one start is allowed");
+                        start = new MapSolver.Point(i, j);
                         break;
                     default:
                         throw new IllegalArgumentException("Invalid map");

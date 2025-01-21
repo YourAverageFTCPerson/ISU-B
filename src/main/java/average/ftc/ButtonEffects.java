@@ -19,7 +19,8 @@ public class ButtonEffects {
         ScaleTransition scale = new ScaleTransition(Duration.millis(500d), button);
         scale.setInterpolator(Interpolator.EASE_BOTH);
 
-        button.hoverProperty().addListener((_, _, current) -> {
+        button.hoverProperty().addListener((_, previous, current) -> {
+            if (previous == current) return;
             scale.stop();
             double amount = current ? 1.5 : 1d;
             scale.setToX(amount);

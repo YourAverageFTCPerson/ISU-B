@@ -80,12 +80,15 @@ public class EnemyController implements Initializable {
         if (amount < 1)
             throw new IllegalArgumentException("illegal amount");
         ImageView[] enemies = new ImageView[amount];
+        MapSolver.Point start = MapLoader.start;
         for (int i = 0; i < amount; i++) {
             enemies[i] = new ImageView(base);
             enemies[i].setFitWidth(MapLoader.getXScale() * 0.75); // TODO remove magic number
             enemies[i].setPreserveRatio(true);
-            enemies[i].setTranslateX(-MapLoader.getXScale());
-            enemies[i].setTranslateY(i * MapLoader.getYScale());
+//            enemies[i].setTranslateX(-MapLoader.getXScale());
+//            enemies[i].setTranslateY(i * MapLoader.getYScale());
+            enemies[i].setTranslateX(start.x() * MapLoader.getXScale());
+            enemies[i].setTranslateY(start.y() * MapLoader.getYScale());
             System.out.println("y: " + enemies[i].getTranslateY());
             enemies[i].setVisible(true);
             SecureRandom random;

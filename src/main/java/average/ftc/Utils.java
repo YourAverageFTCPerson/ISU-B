@@ -23,7 +23,7 @@ public class Utils {
     }
 
     public static void shootAt(double fromX, double fromY, ImageView to) {
-//        if (true) return;
+        if (true) return;
         Objects.requireNonNull(to, "to");
         ImageView bullet = new ImageView(BULLET_IN_AIR); // Multiple bullets at the same time are possible
         bullet.setTranslateX(fromX);
