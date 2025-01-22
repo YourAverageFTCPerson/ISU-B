@@ -4,7 +4,6 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -24,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ActualGame {
     private static final System.Logger LOGGER = System.getLogger(ActualGame.class.getName());
@@ -85,7 +85,7 @@ public class ActualGame {
         public double initialTranslateY;
     }
 
-    private Node makeDraggable(final Node node) {
+    static Node makeDraggable(final Node node) {
         final Group wrapGroup = new Group(node);
         final DragContext dragContext = new DragContext();
 
@@ -192,9 +192,34 @@ public class ActualGame {
         }
     }
 
+    private static Label loss;
+
+    static Stage primaryStage;
+
+    static void onLoss() {
+        shooterThread.interrupt();
+        try {
+            root.getChildren().add(loss);
+            showAlert(loss);
+        } catch (IllegalArgumentException _) {
+            // duplicate
+        }
+
+        Sounds.EncryptedHolder.BGM0.stop();
+        Sounds.FriendlyGunHolder.FRIENDLY_GUN.stop();
+        Sounds.EncryptedHolder.LOSS0.play();
+
+        EnemyController.movements.forEach((_, ms) -> {
+            ms.stopped().set(true);
+        });
+
+        Statistics.collect(primaryStage);
+    }
+
     public static void startOn(Stage primaryStage) {
         LOGGER.log(System.Logger.Level.INFO, primaryStage);
         LOGGER.log(System.Logger.Level.DEBUG, "FRIENDLY_GUN duration: " + Sounds.FriendlyGunHolder.FRIENDLY_GUN.getCycleDuration().toSeconds());
+        ActualGame.primaryStage = primaryStage;
         try {
             root = FXMLLoader.load(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("ActualGame.fxml")));
             ConfigParser.Config config = ConfigParser.readConfig();
@@ -220,6 +245,9 @@ public class ActualGame {
             insufficientFunds = new Label("Insufficient funds");
             insufficientFunds.setFont(warner.getFont());
             insufficientFunds.setTextFill(warner.getTextFill());
+            loss = new Label("GAME OVER");
+            loss.setFont(warner.getFont());
+            loss.setTextFill(warner.getTextFill());
             groundToAir.setOnMouseClicked(_ -> {
                 if (!ISRController.instance.isr.isVisible()) return;
                 if (setBalance(balance - COST_OF_GROUND_TO_AIR)) {
@@ -234,7 +262,7 @@ public class ActualGame {
             ISRController.ON_ISR_DONE.add(() -> {
                 groundToAir.setOnMouseClicked(null);
                 groundToAir.setVisible(false);
-                Label label = new Label("You've doomed us all");
+                Label label = new Label("Good enemy pathfinding: On");
                 label.setFont(warner.getFont());
                 label.setTextFill(warner.getTextFill());
                 Platform.runLater(() -> {
@@ -247,29 +275,41 @@ public class ActualGame {
 //            map.minHeight(MapLoader.getXScale() * MapLoader.getRows());
 //            map.setLayoutX(0);
 //            map.setLayoutY(0);
-            mapUnsynchronized.addAll(EnemyController.spawnNormalEnemies(config.getEnemies()));
-            ON_ROOT_LOADED.forEach(Runnable::run);
-            Sounds.EncryptedHolder.BGM0.play();
-            shooterThread = Thread.ofVirtual().unstarted(() -> {
-                double previousTime = System.nanoTime() + nanoIncrement;
-                Sounds.FriendlyGunHolder.FRIENDLY_GUN.setCycleCount(MediaPlayer.INDEFINITE);
-                Sounds.FriendlyGunHolder.FRIENDLY_GUN.play();
-                while (!Thread.interrupted()) {
-                    double currentTime = System.nanoTime();
-                    if (currentTime - previousTime < nanoIncrement) continue;
-                    towerOperators.forEach(TowerOperator::update);
-                    TowerOperator.alreadyAttacking.clear();
-                    previousTime = currentTime;
+            new Thread(() -> {
+                while (RANDOM.nextBoolean()) {
+                    try {
+                        //noinspection BusyWait
+                        Thread.sleep(1000L);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-                // TODO: (wave is over)
-            });
-            shooterThread.setName("Shooter");
-            shooterThread.setUncaughtExceptionHandler((t, e) -> {
-                LOGGER.log(System.Logger.Level.ERROR, "Exception on thread '" + t.getName() + '\'', e);
-                System.exit(1);
-                throw new AssertionError();
-            });
-            shooterThread.start();
+                Platform.runLater(() -> {
+                    mapUnsynchronized.addAll(EnemyController.spawnNormalEnemies(config.getEnemies()));
+                    ON_ROOT_LOADED.forEach(Runnable::run);
+                    Sounds.EncryptedHolder.BGM0.play();
+                    shooterThread = Thread.ofVirtual().unstarted(() -> {
+                        double previousTime = System.nanoTime() + nanoIncrement;
+                        Sounds.FriendlyGunHolder.FRIENDLY_GUN.setCycleCount(MediaPlayer.INDEFINITE);
+                        Sounds.FriendlyGunHolder.FRIENDLY_GUN.play();
+                        while (!Thread.interrupted()) {
+                            double currentTime = System.nanoTime();
+                            if (currentTime - previousTime < nanoIncrement) continue;
+                            towerOperators.forEach(TowerOperator::update);
+                            TowerOperator.alreadyAttacking.clear();
+                            previousTime = currentTime;
+                        }
+                        // TODO: (wave is over)
+                    });
+                    shooterThread.setName("Shooter");
+                    shooterThread.setUncaughtExceptionHandler((t, e) -> {
+                        LOGGER.log(System.Logger.Level.ERROR, "Exception on thread '" + t.getName() + '\'', e);
+                        System.exit(1);
+                        throw new AssertionError();
+                    });
+                    shooterThread.start();
+                });
+            }).start();
         } catch (Throwable throwable) {
             LOGGER.log(System.Logger.Level.ERROR, "Huh?", throwable);
             System.exit(1);

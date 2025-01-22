@@ -116,7 +116,7 @@ public class MapLoader {
                         view = new ImageView(ObservationPostHolder.OBSERVATION_POST);
                         view.setX(i * getXScale());
                         view.setY(j * getYScale());
-                        children.add(view);
+                        children.add(ActualGame.makeDraggable(view));
                         break;
                     case GOAL:
                         if (++numberOfGoals == 2)

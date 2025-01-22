@@ -24,7 +24,7 @@ public class EnemyController implements Initializable {
     /**
      * km/h
      */
-    private static final double ENEMY_SPEED = 70d;
+    private static final double ENEMY_SPEED = 1000d;
 
     private static Image base;
 
@@ -52,10 +52,7 @@ public class EnemyController implements Initializable {
         if (stopped.get()) return;
         if (!transitions.hasNext()) {
             if (stopped.get()) return;
-            Sounds.EncryptedHolder.BGM0.stop();
-            // TODO
-            Sounds.FriendlyGunHolder.FRIENDLY_GUN.stop();
-            Sounds.EncryptedHolder.LOSS0.play();
+            ActualGame.onLoss();
             return;
         }
         TranslateTransition transition = transitions.next();
