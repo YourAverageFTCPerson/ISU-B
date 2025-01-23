@@ -56,7 +56,7 @@ public class MapLoader {
     }
 
     private static final class ObservationPostHolder {
-        private static final Image OBSERVATION_POST = new Image(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("ObservationPost.png")), getXScale(), 0d, true, true);
+        private static final Image OBSERVATION_POST = new Image(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("tierone.png")), getXScale(), 0d, true, true);
     }
 
     private static final class GoalHolder {

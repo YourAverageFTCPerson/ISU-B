@@ -23,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ActualGame {
     private static final System.Logger LOGGER = System.getLogger(ActualGame.class.getName());
@@ -145,6 +144,15 @@ public class ActualGame {
     public static void onAllEnemiesRemoved() {
         Sounds.FriendlyGunHolder.FRIENDLY_GUN.stop();
         shooterThread.interrupt();
+
+        new Thread(() -> {
+//            try {
+//                Thread.sleep(5000L);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+            Platform.runLater(() -> Statistics.collect(primaryStage));
+        }).start();
     }
 
     private static Thread shooterThread;
@@ -213,12 +221,17 @@ public class ActualGame {
             ms.stopped().set(true);
         });
 
-        Statistics.collect(primaryStage);
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Platform.runLater(() -> Statistics.collect(primaryStage));
+        }).start();
     }
 
     public static void startOn(Stage primaryStage) {
-        LOGGER.log(System.Logger.Level.INFO, primaryStage);
-        LOGGER.log(System.Logger.Level.DEBUG, "FRIENDLY_GUN duration: " + Sounds.FriendlyGunHolder.FRIENDLY_GUN.getCycleDuration().toSeconds());
         ActualGame.primaryStage = primaryStage;
         try {
             root = FXMLLoader.load(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("ActualGame.fxml")));
@@ -269,7 +282,6 @@ public class ActualGame {
                     root.getChildren().add(label);
                     showAlert(label, () -> root.getChildren().remove(label));
                 });
-                System.out.println("Shown");
             });
 
 //            map.minHeight(MapLoader.getXScale() * MapLoader.getRows());

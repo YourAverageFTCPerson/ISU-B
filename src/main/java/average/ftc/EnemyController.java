@@ -24,7 +24,7 @@ public class EnemyController implements Initializable {
     /**
      * km/h
      */
-    private static final double ENEMY_SPEED = 1000d;
+    private static final double ENEMY_SPEED = 70d;
 
     private static Image base;
 

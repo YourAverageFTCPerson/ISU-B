@@ -14,7 +14,7 @@ public class Utils {
     public static final Image BULLET_IN_AIR = new Image(Objects.requireNonNull(Thread.currentThread()
                                                             .getContextClassLoader()
                                                             .getResourceAsStream("bullet-in-air.png")),
-            MapLoader.getXScale(), MapLoader.getYScale(), true, true);
+            50d, 50d, true, true);
 
     private static List<Node> map;
 
@@ -23,7 +23,8 @@ public class Utils {
     }
 
     public static void shootAt(double fromX, double fromY, ImageView to) {
-        if (true) return;
+        System.out.println("shooting");
+//        if (true) return;
         Objects.requireNonNull(to, "to");
         ImageView bullet = new ImageView(BULLET_IN_AIR); // Multiple bullets at the same time are possible
         bullet.setTranslateX(fromX);
@@ -40,6 +41,7 @@ public class Utils {
 
         transition.setToX(to.getX() + to.getTranslateX());
         transition.setToY(to.getY() + to.getTranslateY());
+        Statistics.enemyDistancesAtDeath.add((int) (Math.abs(to.getX() + to.getTranslateX() - MapLoader.goal.x()) + Math.abs(to.getY() + to.getTranslateY() - MapLoader.goal.y())));
         transition.play();
         transition.setOnFinished(_ -> {
             map.remove(bullet);

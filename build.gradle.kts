@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("application")
+    id("com.github.mrsarm.jshell.plugin") version "1.2.1"
 }
 
 group = "average.ftc"

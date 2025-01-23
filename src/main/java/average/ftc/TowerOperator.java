@@ -13,8 +13,10 @@ public interface TowerOperator {
     int y();
 
     default void update() {
+        System.out.println("update()");
         synchronized (ActualGame.getMap()) {
             Iterator<ImageView> enemies = ActualGame.getEnemies();
+            System.out.println("update(): enemies: " + enemies);
             if (!enemies.hasNext()) {
                 ActualGame.onAllEnemiesRemoved();
                 return;
@@ -35,10 +37,26 @@ public interface TowerOperator {
                             + probabilityOfAcquiringCloserTarget
                             + " is not valid. (not real between 0 and 1)");
 
+                if (distance > this.range()) {
+                    System.out.println("Condition 1: distance > this.range()");
+                }
+                if (distance >= closestDistance) {
+                    System.out.println("Condition 2: distance >= closestDistance");
+                }
+                if (ActualGame.RANDOM.nextDouble() > probabilityOfAcquiringCloserTarget) {
+                    System.out.println("Condition 3: ActualGame.RANDOM.nextDouble() > probabilityOfAcquiringCloserTarget");
+                }
+                if (alreadyAttacking.contains(enemy)) {
+                    System.out.println("Condition 4: alreadyAttacking.contains(enemy)");
+                }
+
                 if (distance > this.range()
                         || distance >= closestDistance
                         || ActualGame.RANDOM.nextDouble() > probabilityOfAcquiringCloserTarget
-                        || alreadyAttacking.contains(enemy)) continue;
+                        || alreadyAttacking.contains(enemy)) {
+                    System.out.println("continuing");
+                    continue;
+                }
                 closestDistance = distance;
                 closest = enemy;
             } while (enemies.hasNext());

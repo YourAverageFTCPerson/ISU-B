@@ -12,6 +12,6 @@ public record TierOne(List<Node> map, int x, int y) implements TowerOperator {
 
     @Override
     public double range() {
-        return 600d;
+        return 10000d;
     }
 }
