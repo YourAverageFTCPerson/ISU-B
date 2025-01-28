@@ -1,14 +1,13 @@
 package average.ftc;
 
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
+//import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
+//import javafx.scene.paint.Color;
+//import javafx.scene.shape.Line;
+//import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.*;
@@ -21,27 +20,27 @@ public class Statistics {
     public static LinkedList<Integer> enemyDistancesAtDeath = new LinkedList<>();
 //    public static int[] confirmedKills; // Of TowerOperators
 
-    private static Group boxPlot(double width, double min, double max, double median, int... data) { // Never quite got this to work lol
-        Group plot = new Group();
-        Line line = new Line(0d, 100d, width, 100d);
-        line.setStrokeWidth(10);
-        plot.getChildren().add(line);
-
-        Label minimum = new Label(Double.toString(min));
-        minimum.setFont(new Font(75));
-        minimum.setTextFill(Color.LIGHTBLUE);
-        minimum.setTranslateY(110d);
-        plot.getChildren().add(minimum);
-
-        Label maximum = new Label(Double.toString(max));
-        maximum.setFont(new Font(100));
-        maximum.setTextFill(Color.LIGHTBLUE);
-        maximum.setTranslateY(110d + width);
-        plot.getChildren().add(maximum);
-
-//        plot.getChildren().add(new Box());
-        return plot;
-    }
+//    private static Group boxPlot(double width, double min, double max, double median, int... data) { // Never quite got this to work lol
+//        Group plot = new Group();
+//        Line line = new Line(0d, 100d, width, 100d);
+//        line.setStrokeWidth(10);
+//        plot.getChildren().add(line);
+//
+//        Label minimum = new Label(Double.toString(min));
+//        minimum.setFont(new Font(75));
+//        minimum.setTextFill(Color.LIGHTBLUE);
+//        minimum.setTranslateY(110d);
+//        plot.getChildren().add(minimum);
+//
+//        Label maximum = new Label(Double.toString(max));
+//        maximum.setFont(new Font(100));
+//        maximum.setTextFill(Color.LIGHTBLUE);
+//        maximum.setTranslateY(110d + width);
+//        plot.getChildren().add(maximum);
+//
+////        plot.getChildren().add(new Box());
+//        return plot;
+//    }
 
     public static void collect(Stage stage) {
         try {
@@ -87,8 +86,8 @@ public class Statistics {
                 mean = sum / enemyDistancesAtDeath.length;
             } else {
                 mean = 0d;
-                min = 0d;
-                max = 0d;
+//                min = 0d;
+//                max = 0d;
             }
 
             int halfLength = enemyDistancesAtDeath.length / 2; // floor div
@@ -102,7 +101,7 @@ public class Statistics {
 //            };
 //            timer.start();
 
-            root.getChildren().add(boxPlot(5000d, min, max, median, enemyDistancesAtDeath));
+//            root.getChildren().add(boxPlot(5000d, min, max, median, enemyDistancesAtDeath));
 
             Scene scene = new Scene(root);
             stage.setScene(scene);
